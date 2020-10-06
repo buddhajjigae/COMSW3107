@@ -1,1 +1,1 @@
-# COMSW3107
+# COMSW3107 Programming assignments by Alex Yu.
