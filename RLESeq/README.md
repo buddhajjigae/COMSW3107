@@ -1,1 +1,1 @@
-
+A data structure that represents a pixel value on a screen. The way that the data structure is represented/manipulated changes depending on the version (i.e. V1, V2, V3). See the Java source file comments for more information on each version. 
