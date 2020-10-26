@@ -1,1 +1,1 @@
-# COMSW3107 Programming assignments by Alex Yu.
+COMSW3107 Clean Object-Oriented Design programming assignments from Fall 2020
