@@ -8,6 +8,11 @@
  * whether or not they will decide to write the record that has been read. This also follows the design style of 
  * other similar classes such as csv reader and csv writer where the two are separated. 
  * 
+ * Note: The checks will also prevent multiple tabs in lines and one or both of the first two lines being composed 
+ * of only '\n' as being considered a valid .tsv source file. However, it will read any lines composed of only '\n' 
+ * after the first two lines but it will not consider them as valid records to be sent to writer. However, this can 
+ * easily be changed to allow empty records (composed of only '\n') by changing the check for it in the read() method. 
+ * 
  * @author Alex Yu ajy2116
  */
 
@@ -18,7 +23,9 @@ import java.util.Scanner;
 
 public class TSVRead {
 	private Scanner scan;
-	private String[] fields;
+	// Field names are stored to check first two line validity
+	private String[] fieldNames;
+	// Field types are stored to check first two line validity and subsequent record validity
 	private String[] fieldTypes;
 	private File sourceFile;
 	private boolean validSource = false;
@@ -37,7 +44,6 @@ public class TSVRead {
 	 */
 	public TSVRead(String sourceFilePath) throws IOException {
 		sourceFile = new File(sourceFilePath);
-		scan = new Scanner(sourceFile);
 		String isTSV = sourceFilePath.substring(sourceFilePath.length() - 4, sourceFilePath.length());
 
 		if (!isTSV.equals(".tsv")) {
@@ -45,15 +51,15 @@ public class TSVRead {
 			throw new IOException();
 		}
 		if (sourceFile.exists()) {
+			scan = new Scanner(sourceFile);
 			if (!checkFirstTwo()) {
 				System.out.println(
 						"Number of field names in first line must equal" + "number of field types in second line.");
 				throw new IOException();
 			}
 		} else {
-			// **********How can I make this print?
 			System.out.println("Source file does not exist.");
-			throw new IOException();
+			throw new IOException("notExists");
 		}
 	}
 
@@ -79,10 +85,15 @@ public class TSVRead {
 			// Trims the record to ensure that blank spaces do not affect checkRecord method
 			trimmedArray = trimRecord(record.split("\t"));
 			recordArray = record.split("\t");
-			if (checkRecord(trimmedArray)) {
+			if (checkRecord(trimmedArray) && record != "") {
 				lineCounter++;
 				return recordArray;
 			} else {
+				// I chose not to System.out.print to the user that an invalid record has been
+				// found because
+				// the method returns a record and if it is invalid, the record will be returned
+				// as null. Printing
+				// constant invalid records may cause clutter and be annoying for the user.
 				invalidRecordCount++;
 			}
 		}
@@ -93,7 +104,7 @@ public class TSVRead {
 	 * This method checks to see if the first two lines of the file are valid. They
 	 * are valid if the number of field names in the first line is the same as the
 	 * number of field types in the second line. An exception will be thrown if they
-	 * are not the same or if one of the first two lines are missing.
+	 * are not of the same length or if one of the first two lines are missing.
 	 * 
 	 * @return returns true if the first two lines are valid and false if not
 	 */
@@ -104,19 +115,23 @@ public class TSVRead {
 		try {
 			if (checkScan.hasNextLine()) {
 				record = checkScan.nextLine();
-				fields = trimRecord(record.split("\t"));
+				if (!record.isEmpty()) {
+					fieldNames = trimRecord(record.split("\t"));
+				}
 			} else {
 				checkScan.close();
 				throw new Exception("invalidTSVFile");
 			}
 			if (checkScan.hasNextLine()) {
 				record = checkScan.nextLine();
-				fieldTypes = trimRecord(record.split("\t"));
+				if (!record.isEmpty()) {
+					fieldTypes = trimRecord(record.split("\t"));
+				}
 			} else {
 				checkScan.close();
 				throw new Exception("invalidTSVFile");
 			}
-			if (fields.length == fieldTypes.length) {
+			if (fieldNames.length == fieldTypes.length) {
 				validSource = true;
 			}
 		} catch (Exception invalidTSVFile) {
@@ -131,7 +146,7 @@ public class TSVRead {
 	/**
 	 * This method checks to see if the current record that is being read is valid.
 	 * A record is valid if it has the same number of elements as the field type
-	 * found in line 2 and if 'byte' is a field in the source file, then the current
+	 * found in line 2 and if 'byte' is a field type in the source file, then the current
 	 * record must have bytes in the column that the 'byte' field is in. All other
 	 * field types are ignored because a String can be composed of any
 	 * character/number and because custom data types such as Foo cannot be
@@ -148,8 +163,8 @@ public class TSVRead {
 		int invalidCount = 0;
 
 		if (record.length == fieldTypes.length) {
-			for (int i = 0; i < fieldTypes.length; i++) {
-				if (fieldTypes[i].equals("byte") && !checkByte(record[i])) {
+			for (int index = 0; index < fieldTypes.length; index++) {
+				if (fieldTypes[index].equals("byte") && !checkByte(record[index])) {
 					invalidCount++;
 				}
 			}
@@ -193,8 +208,8 @@ public class TSVRead {
 	private String[] trimRecord(String[] record) {
 		String[] trimmedRecord = new String[record.length];
 
-		for (int i = 0; i < record.length; i++) {
-			trimmedRecord[i] = record[i].trim();
+		for (int index = 0; index < record.length; index++) {
+			trimmedRecord[index] = record[index].trim();
 		}
 		return trimmedRecord;
 	}
@@ -210,9 +225,9 @@ public class TSVRead {
 	}
 
 	/**
-	 * This method is a helper method to access whether the class member variable
+	 * This method is used to access whether the class member variable
 	 * scanner has a next line to read in the source file or not. It is called by
-	 * other classes such as TSVPipeline to access the scanner of TSVRead.
+	 * TSVPipeline to access the scanner of TSVRead.
 	 * 
 	 * @return returns whether the class member variable scanner has a next line to
 	 *         read in the source file or not.
@@ -228,8 +243,8 @@ public class TSVRead {
 	 * @param record the current record that is being read
 	 */
 	private void printRecord(String[] record) {
-		for (int i = 0; i < record.length; i++) {
-			System.out.println(record[i]);
+		for (int index = 0; index < record.length; index++) {
+			System.out.println(record[index]);
 		}
 	}
 }
