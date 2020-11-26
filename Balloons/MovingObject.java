@@ -1,8 +1,15 @@
+
+/**
+ * The MovingObject interface used for draw() and translate() methods. 
+ * 
+ * @author Alex Yu ajy2116 using John Kender's alteration of Cay Horstmann's code.
+ * 
+ *
+ */
+
 import java.awt.*;
 
-/** *  * @author jrk based on cay horstmann * */
-
 public interface MovingObject {
-	void draw(Graphics2D g2D);
+	void draw(Graphics2D graphics2D);
 	void translate(int xChange, int yChange, double randomDrift);
 }
