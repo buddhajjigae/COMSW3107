@@ -5,7 +5,8 @@
  * create a JSlider to control the speed at which the balloon objects move on the 
  * x and y axis'. 
  * 
- * @author Alex Yu ajy2116
+ * @author Alex Yu ajy2116 based on John Kender's alteration of Cay Horstmann's code.
+ * (Horstmann's Timer and Jframe logic used as guide) 
  *
  */
 
@@ -35,6 +36,8 @@ public class Control {
 	private static final int DELAY = 100;
 	private static final int MAX_BALLOONS = 7;
 	private static final int MIN_BALLOONS = 3;
+	private static final int MAX_SPEED = 5;
+	private static final int MIN_SPEED = -5;
 
 	/**
 	 * Class constructor that creates the JFrame along with the objects that will be
@@ -51,7 +54,7 @@ public class Control {
 		label = new JLabel(icon);
 		speed = 1;
 
-		speedSlider = new JSlider(JSlider.VERTICAL, -5, 5, speed);
+		speedSlider = new JSlider(JSlider.VERTICAL, MIN_SPEED, MAX_SPEED, speed);
 		speedSlider.setMajorTickSpacing(5);
 		speedSlider.setMinorTickSpacing(1);
 		speedSlider.setPaintTicks(true);
@@ -62,9 +65,8 @@ public class Control {
 		 * (moving the slider).
 		 */
 		speedSlider.addChangeListener(new ChangeListener() {
-			@Override
-			public void stateChanged(ChangeEvent e) {
-				JSlider source = (JSlider) e.getSource();
+			public void stateChanged(ChangeEvent event) {
+				JSlider source = (JSlider) event.getSource();
 				speed = source.getValue();
 			}
 		});
