@@ -11,5 +11,6 @@ import java.awt.*;
 
 public interface MovingObject {
 	void draw(Graphics2D graphics2D);
-	void translate(int xChange, int yChange, double randomDrift);
+
+	void translate(double d, double yChange);
 }
