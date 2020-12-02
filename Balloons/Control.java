@@ -2,11 +2,22 @@
 /**
  * The Control class is used to create the necessary gui objects to display the
  * MovingObjects (balloons) and functions to affect the MovingObject objects in the gui. 
- * It will also generate a random number of Balloons that will be displayed in the gui. 
- * It will also create a JSlider to allow the user to control the speed at which 
- * the MovingObject objects move on the x and y axis' and define a Timer that 
+ * It will also generate a random number of Balloons (between 2 and 8) that will be 
+ * displayed in the gui. It will also create a JSlider to allow the user to control the 
+ * speed at which the MovingObject objects move on the x and y axis' and define a Timer that 
  * calls translate to change the x and y axis' of the MovingObject objects at a set 
- * interval in milliseconds. The start() function will run the Timer. 
+ * interval in milliseconds. The start() function will run the Timer. Balloons are generated
+ * by creating a MassMovingObjects object that contains WindWrapper objects that then contain 
+ * MassMovingObjects that then contain WindWrapper objects that contain Balloon objects.
+ * Wrapping an object with WindWrapper allows for random winds on the x coordinate to occur
+ * for each of the objects in the WindWrapper object. This hierarchy of creation will therefore
+ * create a group of balloons that have a group wind for the entire group and each balloon will
+ * also have its own individual wind. 
+ * In short the root (parent) MassMovingObjects will contain:
+ * WindWrapper -> MassMovingObjects -> WindWrapper -> Balloon(s)
+ * Translate will be called from the root MassMovingObjects until it will finally
+ * be called in Balloon to move the balloon's x and y coordinate. Draw works similarly to draw
+ * the Balloon object. 
  * 
  * @author Alex Yu ajy2116 based on John Kender's alteration of Cay Horstmann's code.
  * (Horstmann's Timer and Jframe logic used as guide) 
@@ -81,6 +92,9 @@ public class Control {
 	/**
 	 * This method creates a Timer which will be called every DELAY (milliseconds)
 	 * to call translate on the MovingObject. It will then repaint the MovingObject.
+	 * Since translate for MassMovingObjects calls translate onto what it contains
+	 * and WindWrapper does the same, changes in x and y will occur when Balloon
+	 * calls translate.
 	 */
 	private void createTimer() {
 		timer = new Timer(DELAY, new ActionListener() {
@@ -92,12 +106,12 @@ public class Control {
 	}
 
 	/**
-	 * This method generates a random number of Balloon objects for a mass
-	 * ascension. It does so by creating mass containers through MassMovingObjects
-	 * and then adding Balloon objects that are wrapped with WindWrapper objects to
-	 * those containers. The mass balloon containers are then wrapped with
-	 * WindWrapper objects before being added to the over arching MassMovingObjects
-	 * container. 
+	 * This method generates a random number of Balloon objects for a mass ascension
+	 * in a given range. It does so by creating mass containers through
+	 * MassMovingObjects and then adding Balloon objects that are wrapped with
+	 * WindWrapper objects to those containers. The mass balloon containers are then
+	 * wrapped with WindWrapper objects before being added to the over arching
+	 * MassMovingObjects container.
 	 */
 	private void generateMassBalloons() {
 		for (int groupCount = 0; groupCount < MAX_BALLOON_GROUPS; groupCount++) {
