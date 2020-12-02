@@ -2,7 +2,7 @@
 /**
  * The Balloon class defines a hot air balloon object as a MovingObject. It contains a translate 
  * function that changes the x and y position of a balloon. Draw is used to paint the balloon object
- * on the respective Icon. 
+ * on the respective Icon. Any movement of a Balloon object will occur in it's translate() function. 
  * 
  * @author Alex Yu ajy2116 based on John Kender's alteration of Cay Horstmann's code.
  * (Horstmann's translate and draw logic used as guide) 
