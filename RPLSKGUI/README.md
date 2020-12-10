@@ -1,1 +1,1 @@
-
+A GUI version of RPLSK where Strings of RPSLK will be displayed in a Java sandbox GUI, moving across the sandbox. Intersections will result in either the losing String being removed or a new String of the same name if two objects of the same name collide.
