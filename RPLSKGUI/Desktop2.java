@@ -3,6 +3,8 @@ import java.awt.event.*;
 import java.awt.font.*;
 import java.awt.geom.*;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Random;
 
 import javax.swing.*;
 
@@ -17,10 +19,9 @@ import javax.swing.*;
  */
 
 public class Desktop2 {
-	
+
 	static ArrayList<Throwable> throwList = new ArrayList<Throwable>();
-	
-	
+
 	// Java 8 independent thread idiom, from tutorial
 	public static void main(String[] args) {
 		SwingUtilities.invokeLater(new Runnable() {
@@ -36,14 +37,11 @@ public class Desktop2 {
 		System.out.println("Created GUI on EDT? " + SwingUtilities.isEventDispatchThread());
 		// usual frame idioms
 		JFrame myFrame = new JFrame("Desktop version");
-		StringMovingObject obj2 = new StringMovingObject("Rock", 500, 0);
-		StringMovingObject obj = new StringMovingObject.Builder().throwName("Scissors").throwX(500).throwY(0).build();
-		//DesktopPanel myPanel = new DesktopPanel(obj2);
-		generateThrowables();
-		DesktopPanel myPanel = new DesktopPanel(throwList);
-		//myFrame.add(myPanel);
+		// DesktopPanel myPanel = new DesktopPanel(obj2);
 
-
+		DesktopPanel myPanel = new DesktopPanel();
+		// myFrame.add(myPanel);
+		// myPanel.generateThrowables();
 		myFrame.add(myPanel);
 		myFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		myFrame.pack();
@@ -53,65 +51,142 @@ public class Desktop2 {
 			public void actionPerformed(ActionEvent e) {
 				// myPanel knows enough to do the job
 				myPanel.update(); // send signal to JPanel
-				myPanel.collision(obj);
 				myPanel.repaint();
+				myPanel.collision();
+				
 			}
 		});
 		myTimer.start();
 	}
-	
-	private static void generateThrowables() {
-		throwList.add(new Throwable(new StringMovingObject("Rock", 400, 100)));
-		throwList.add(new Throwable(new StringMovingObject("Scissor", 400, 100)));
-	}
-
 }
 
 // inner class, trying to be like applet, with all code in one file
 class DesktopPanel extends JPanel {
-	private MovingObject obj;
 	private ArrayList<Throwable> objList;
+	ArrayList<String> throwPairs;
+	private final int MAX_DIM_X = 500;
+	private final int MAX_DIM_Y = 500;
+	String outcome = "";
 
-	
-	public DesktopPanel(MovingObject obj) {
-		this.obj = obj;
+	public DesktopPanel() {
+		objList = new ArrayList<Throwable>();
+		throwPairs = new ArrayList<String>();
+		generateThrowables();
 	}
-	
-	public DesktopPanel(ArrayList<Throwable> objList) {
-		this.objList = objList;
-	}
-	
-	
+
 	public Dimension getPreferredSize() {
-		return new Dimension(500, 500);
+		return new Dimension(MAX_DIM_X, MAX_DIM_Y);
 	}
 
-	protected void update() {
-		//obj.update();
-		for(MovingObject obj : objList) {
-			obj.update();
-		}
-	}
-	
-	protected boolean collision(MovingObject obj) {
-		for(int i = 0; i < objList.size(); i++) {
-			for(int j = i + 1; j < objList.size(); j++) {
-				if(objList.get(i).collision(objList.get(j))) {
-					System.out.println("HERE");
-					return true;
+	public void collision() {
+		// ArrayList<Integer> removeList = new ArrayList<Integer>();
+		ArrayList<Throwable> removeList = new ArrayList<Throwable>();
+		ArrayList<Throwable> addList = new ArrayList<Throwable>();
+		
+		for (int i = 0; i < objList.size(); i++) {
+			// System.out.println("[" + i + "]" + objList.get(i).getRectangle());
+			for (int j = i + 1; j < objList.size(); j++) {
+				if (objList.get(i).collision(objList.get(j))) {
+					outcome = "";
+					// System.out.println("COLLIDED");
+					if (Handle.outcomes(objList.get(i), objList.get(j)) == Outcomes.WIN) {
+						removeList.add(objList.get(j));
+						throwPairs.add(objList.get(i).getName().toString());
+						throwPairs.add(Outcomes.WIN.toString());
+						throwPairs.add(objList.get(j).getName().toString());
+					} else if (Handle.outcomes(objList.get(i), objList.get(j)) == Outcomes.LOSS) {
+						removeList.add(objList.get(i));
+						throwPairs.add(objList.get(j).getName().toString());
+						throwPairs.add(Outcomes.WIN.toString());
+						throwPairs.add(objList.get(i).getName().toString());
+					} else {
+						removeList.add(objList.get(i));
+						removeList.add(objList.get(j));
+						addList.add(objList.get(i));
+						throwPairs.add(objList.get(i).getName().toString());
+						throwPairs.add(Outcomes.TIE.toString());
+						throwPairs.add(objList.get(j).getName().toString());
+					}
 				}
 			}
 		}
-		return false;
+		removeThrows(removeList);
+		addThrows(addList);
+	}
+
+	public void generateThrowables() {
+		for (int i = 0; i < 10; i++) {
+			ThrowTypes randomThrow = generateThrowType();
+			ThrowColors randomColor = generateColor();
+			double randomX = Math.random() * (MAX_DIM_X);
+			double randomY = Math.random() * (MAX_DIM_Y);
+			double randomVelocityX = generateVelocity();
+			double randomVelocityY = generateVelocity();
+			objList.add(new Throwable(new StringMovingObject.Builder().throwName(randomThrow).throwColor(randomColor)
+					.throwX(randomX).throwY(randomY).velocityX(randomVelocityX).velocityY(randomVelocityY).build()));
+		}
+
+		objList.add(new Throwable(new StringMovingObject.Builder().throwName(ThrowTypes.ROCK).throwColor(ThrowColors.BLACK)
+				.throwX(250).throwY(250).velocityX(0).velocityY(0).build()));		
+		objList.add(new Throwable(new StringMovingObject.Builder().throwName(ThrowTypes.ROCK).throwColor(ThrowColors.BLACK)
+				.throwX(400).throwY(250).velocityX(-10).velocityY(0).build()));	
+		objList.add(new Throwable(new StringMovingObject.Builder().throwName(ThrowTypes.SCISSORS).throwColor(ThrowColors.BLACK)
+				.throwX(250).throwY(400).velocityX(0).velocityY(10).build()));	
+
+	}
+
+	public void addThrows(ArrayList<Throwable> addList) {
+		for (int i = 0; i < addList.size(); i++) {
+			ThrowColors randomColor = generateColor();
+			double randomVelocityX = generateVelocity();
+			double randomVelocityY = generateVelocity();
+			objList.add(new Throwable(new StringMovingObject.Builder().throwName(addList.get(i).getName())
+					.throwColor(randomColor).throwX(addList.get(i).getX()).throwY(addList.get(i).getY())
+					.velocityX(randomVelocityX).velocityY(randomVelocityY).build()));
+		}
+	}
+
+	public void removeThrows(ArrayList<Throwable> removeList) {
+		for (int i = 0; i < removeList.size(); i++) {
+			objList.remove(removeList.get(i));
+		}
+	}
+
+	private ThrowTypes generateThrowType() {
+		Random random = new Random();
+		ThrowTypes throwTypes[] = ThrowTypes.values();
+		return throwTypes[random.nextInt(throwTypes.length)];
+	}
+
+	private ThrowColors generateColor() {
+		ThrowColors throwColors[] = ThrowColors.values();
+		Random random = new Random();
+		return throwColors[random.nextInt(throwColors.length)];
+	}
+
+	private double generateVelocity() {
+		return Math.random() * 8 - 4;
+	}
+
+	protected void update() {
+		for (MovingObject obj : objList) {
+			obj.update();
+		}
 	}
 
 	protected void paintComponent(Graphics g) {
-		// clear previous screen
 		super.paintComponent(g);
 		Graphics2D g2d = (Graphics2D) g;
-		for(MovingObject obj : objList) {
-			obj.paintComponent(g);
+		for (MovingObject obj : objList) {
+			obj.paintComponent(g2d);
 		}
-		//obj.paintComponent(g);
+
+		for(String s : throwPairs) {
+			outcome += s + " ";
+		}
+		throwPairs.clear();
+		g2d.setColor(Color.RED);
+		g2d.drawString(outcome, (MAX_DIM_X / 2) - (MAX_DIM_X / 8), MAX_DIM_Y - 10);
+
 	}
 }
