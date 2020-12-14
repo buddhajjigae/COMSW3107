@@ -1,56 +1,54 @@
-import java.awt.Graphics;
-import java.awt.Point;
+import java.awt.Graphics2D;
 import java.awt.geom.Rectangle2D;
 
 public class Throwable implements MovingObject {
-	MovingObject object;
-	
+	private MovingObject object;
+
+
 	public Throwable(MovingObject obj) {
 		this.object = obj;
 	}
-	
+
 	public void update() {
 		object.update();
+		
 	}
 
-	public void paintComponent(Graphics g) {	
-		object.paintComponent(g);
+	public void paintComponent(Graphics2D g2d) {
+		object.paintComponent(g2d);
 	}
 
 	public boolean collision(MovingObject obj) {
-		double height = obj.getHeight();
-		double width = obj.getWidth();
-		double x = obj.getX() - .5 * height;
-		double y = obj.getY() - .5 * width;
-		Rectangle2D rect = object.getRectangle();
-		if(rect.intersects(x, y, height, width)) {
-			System.out.println("====================");
-			System.out.println("WORKED");
-			System.out.println("====================");
+		Rectangle2D rect = this.getRectangle();
+	
+		//rect.setRect( rect.getX() - 0.5*rect.getWidth(), rect.getY() - 0.5*rect.getHeight(), rect.getWidth(), rect.getHeight() );
+		if (rect.intersects(obj.getX(), obj.getY(), obj.getWidth() - 10, obj.getHeight() - 10)) {
 			return true;
 		}
 		return false;
 	}
 
-	public int getX() {
+	public double getX() {
 		return object.getX();
 	}
 
-	public int getY() {
+	public double getY() {
 		return object.getY();
 	}
-	
+
 	public double getHeight() {
 		return object.getHeight();
 	}
-	
+
 	public double getWidth() {
 		return object.getWidth();
 	}
-	
+
 	public Rectangle2D getRectangle() {
 		return object.getRectangle();
 	}
-
-
+	
+	public ThrowTypes getName() {
+		return object.getName();
+	}
 }
