@@ -53,7 +53,7 @@ public class Desktop2 {
 				myPanel.update(); // send signal to JPanel
 				myPanel.repaint();
 				myPanel.collision();
-				
+
 			}
 		});
 		myTimer.start();
@@ -64,8 +64,8 @@ public class Desktop2 {
 class DesktopPanel extends JPanel {
 	private ArrayList<Throwable> objList;
 	ArrayList<String> throwPairs;
-	private final int MAX_DIM_X = 500;
-	private final int MAX_DIM_Y = 500;
+	private final int MAX_DIM_X = 1000;
+	private final int MAX_DIM_Y = 1000;
 	String outcome = "";
 
 	public DesktopPanel() {
@@ -79,32 +79,29 @@ class DesktopPanel extends JPanel {
 	}
 
 	public void collision() {
-		// ArrayList<Integer> removeList = new ArrayList<Integer>();
 		ArrayList<Throwable> removeList = new ArrayList<Throwable>();
 		ArrayList<Throwable> addList = new ArrayList<Throwable>();
-		
+
 		for (int i = 0; i < objList.size(); i++) {
-			// System.out.println("[" + i + "]" + objList.get(i).getRectangle());
 			for (int j = i + 1; j < objList.size(); j++) {
 				if (objList.get(i).collision(objList.get(j))) {
 					outcome = "";
-					// System.out.println("COLLIDED");
 					if (Handle.outcomes(objList.get(i), objList.get(j)) == Outcomes.WIN) {
 						removeList.add(objList.get(j));
 						throwPairs.add(objList.get(i).getName().toString());
-						throwPairs.add(Outcomes.WIN.toString());
+						throwPairs.add(Outcomes.WIN.getOutcome());
 						throwPairs.add(objList.get(j).getName().toString());
 					} else if (Handle.outcomes(objList.get(i), objList.get(j)) == Outcomes.LOSS) {
 						removeList.add(objList.get(i));
 						throwPairs.add(objList.get(j).getName().toString());
-						throwPairs.add(Outcomes.WIN.toString());
+						throwPairs.add(Outcomes.WIN.getOutcome());
 						throwPairs.add(objList.get(i).getName().toString());
 					} else {
 						removeList.add(objList.get(i));
 						removeList.add(objList.get(j));
 						addList.add(objList.get(i));
 						throwPairs.add(objList.get(i).getName().toString());
-						throwPairs.add(Outcomes.TIE.toString());
+						throwPairs.add(Outcomes.TIE.getOutcome());
 						throwPairs.add(objList.get(j).getName().toString());
 					}
 				}
@@ -115,7 +112,7 @@ class DesktopPanel extends JPanel {
 	}
 
 	public void generateThrowables() {
-		for (int i = 0; i < 10; i++) {
+		for (int i = 0; i < 15; i++) {
 			ThrowTypes randomThrow = generateThrowType();
 			ThrowColors randomColor = generateColor();
 			double randomX = Math.random() * (MAX_DIM_X);
@@ -125,14 +122,6 @@ class DesktopPanel extends JPanel {
 			objList.add(new Throwable(new StringMovingObject.Builder().throwName(randomThrow).throwColor(randomColor)
 					.throwX(randomX).throwY(randomY).velocityX(randomVelocityX).velocityY(randomVelocityY).build()));
 		}
-
-		objList.add(new Throwable(new StringMovingObject.Builder().throwName(ThrowTypes.ROCK).throwColor(ThrowColors.BLACK)
-				.throwX(250).throwY(250).velocityX(0).velocityY(0).build()));		
-		objList.add(new Throwable(new StringMovingObject.Builder().throwName(ThrowTypes.ROCK).throwColor(ThrowColors.BLACK)
-				.throwX(400).throwY(250).velocityX(-10).velocityY(0).build()));	
-		objList.add(new Throwable(new StringMovingObject.Builder().throwName(ThrowTypes.SCISSORS).throwColor(ThrowColors.BLACK)
-				.throwX(250).throwY(400).velocityX(0).velocityY(10).build()));	
-
 	}
 
 	public void addThrows(ArrayList<Throwable> addList) {
@@ -177,16 +166,27 @@ class DesktopPanel extends JPanel {
 	protected void paintComponent(Graphics g) {
 		super.paintComponent(g);
 		Graphics2D g2d = (Graphics2D) g;
+		
 		for (MovingObject obj : objList) {
 			obj.paintComponent(g2d);
 		}
-
-		for(String s : throwPairs) {
+			
+		for (String s : throwPairs) {
 			outcome += s + " ";
 		}
+		
+		if (objList.size() == 1) {
+			outcome = "";
+			outcome = objList.get(0).getName().toString();
+			objList.clear();
+			outcome = outcome + " WINS! GAME OVER!";
+		}
+		
+		Font throwFont = new Font("SansSerif", Font.BOLD, 30);
+		
 		throwPairs.clear();
 		g2d.setColor(Color.RED);
+		g2d.setFont(throwFont);
 		g2d.drawString(outcome, (MAX_DIM_X / 2) - (MAX_DIM_X / 8), MAX_DIM_Y - 10);
-
 	}
 }
