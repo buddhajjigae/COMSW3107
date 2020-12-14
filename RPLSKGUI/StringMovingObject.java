@@ -1,108 +1,115 @@
-import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.Point;
-import java.awt.Rectangle;
 import java.awt.font.FontRenderContext;
 import java.awt.geom.Rectangle2D;
 
-import javax.swing.JPanel;
-
-
 public class StringMovingObject implements MovingObject {
+	private ThrowTypes throwName;
+	private ThrowColors throwColor;
+	private double throwX;		// upper 
+	private double throwY;
+	private double rectWidth;
+	private double rectHeight;
+	//private static Rectangle2D throwRectangle;
+	private int DIMX = 1000;
+	private int DIMY = 1000;
+	private double velocityX;
+	private double velocityY;
 
-
-	private String throwName;
-	private int throwX;
-	private int throwY;
-	private static Rectangle2D throwRectangle;
-	private int DIMX = 500;
-	private int DIMY = 500;
-	private int velocityX = 1;
-	private int velocityY = 1;
-
-	
-	public StringMovingObject(String name, int x, int y) {
-		this.throwName = name;
-		this.throwX = x;
-		this.throwY = y;
-	}
-	
 	public void update() {	
-		throwX += -velocityX;
-		throwY += -velocityY;
+		
+		throwX += velocityX;
+		throwY += -velocityY; 
+
+		//throwRectangle.setRect(throwX, throwY, throwRectangle.getWidth(), throwRectangle.getHeight());	
 	}
 
-	public void paintComponent(Graphics g) {
-		System.out.println(throwX + "," + throwY);
-		// clear previous screen
-		// need Graphics2D to get font render context
-		Graphics2D g2d = (Graphics2D) g;
-		// usual font idioms
-		Font throwFont = new Font("Courier", Font.BOLD, 20);
+	public void paintComponent(Graphics2D g2d) {
+		Font throwFont = new Font("Helvetica", Font.BOLD, 28);
 		FontRenderContext throwContext = g2d.getFontRenderContext();
-		// individual objects; in general, should be in an aggregate
-		throwRectangle = throwFont.getStringBounds(throwName, throwContext);
+		Rectangle2D throwRectangle = throwFont.getStringBounds(throwName.toString(), throwContext);
+		rectWidth = throwRectangle.getWidth();
+		rectHeight = throwRectangle.getHeight();
 		// handles wraparound
-		if (throwX + throwRectangle.getWidth() < 0)
+		if (throwX < 0)
 			throwX = DIMX; // this is getWidth() from Component
-		if (throwY + throwRectangle.getWidth() < 0)
+		if (throwY < 0)
 			throwY = DIMY; // this is getWidth() from Component
-		g2d.setColor(Color.DARK_GRAY);
-		g2d.drawString(throwName, throwX, throwY);
+		if (throwX > DIMX)
+			throwX = 0; // this is getWidth() from Component
+		if (throwY > DIMY)
+			throwY = 0;
+
+		//g2d.setColor(Color.RED);
+		g2d.setFont(throwFont);
+		g2d.setColor(throwColor.getColor());
+		//g2d.drawString(throwName.toString(), (int) (throwX - throwRectangle.getWidth()), (int) (throwY - throwRectangle.getHeight())); // centralize
+		g2d.drawString(throwName.toString(), (int) throwX, (int) throwY);
+		//throwRectangle.setRect(thrxowX, throwY, throwRectangle.getWidth(), throwRectangle.getHeight());	
+		//System.out.println( this.throwName +" : "+ throwRectangle + ", x=" + throwX+ ", y="+throwY );
 	}
 
-	
-	public int getX() {
+	public double getX() {
 		return throwX;
 	}
 	
-	public int getY() {
+	public double getY() {
 		return throwY;
 	}
 	
 	public double getHeight() {
-		return throwRectangle.getHeight();
+		return rectHeight;
 	}
 	
 	public double getWidth() {
-		return throwRectangle.getWidth();
+		return rectWidth;
 	}
 	
 	public Rectangle2D getRectangle() {
+		Rectangle2D throwRectangle = new Rectangle2D.Float();
+		throwRectangle.setRect(throwX, throwY, rectWidth, rectHeight);
 		return throwRectangle;
 	}
-		
-	public static class Builder {
-		private String throwName = "Rock";
-		private int throwX = 500;
-		private int throwY = 0;		
-		private int velocityX = 1;
-		private int velocityY = 1;
+	
+	public ThrowTypes getName() {
+		return throwName;
+	}
 
-		public Builder throwName(String name) {
+	// BUILDER
+	public static class Builder {
+		private ThrowTypes throwName = ThrowTypes.SPOCK;
+		private ThrowColors throwColor = ThrowColors.BLACK;
+		private double throwX = 500;
+		private double throwY = 0;		
+		private double velocityX = 1;
+		private double velocityY = 1;
+
+		public Builder throwName(ThrowTypes name) {
 			this.throwName = name;
 			return this;
 		}
+		
+		public Builder throwColor(ThrowColors color) {
+			this.throwColor = color;
+			return this;
+		}
 
-		public Builder throwX(int x) {
+		public Builder throwX(double x) {
 			this.throwX = x;
 			return this;
 		}
 
-		public Builder throwY(int y) {
+		public Builder throwY(double y) {
 			this.throwY = y;
 			return this;
 		}
 		
-		public Builder velocityX(int velocity) {
+		public Builder velocityX(double velocity) {
 			this.velocityX = velocity;
 			return this;
 		}
 		
-		public Builder velocityY(int velocity) {
+		public Builder velocityY(double velocity) {
 			this.velocityY = velocity;
 			return this;
 		}
@@ -113,10 +120,11 @@ public class StringMovingObject implements MovingObject {
 	}
 
 	private StringMovingObject(Builder builder) {
-			this.throwName = builder.throwName;
-			this.throwX = builder.throwX;
-			this.throwY = builder.throwY;
-			this.velocityX = builder.velocityX;
-			this.velocityY = builder.velocityY;
+			throwName = builder.throwName;
+			throwColor = builder.throwColor;
+			throwX = builder.throwX;
+			throwY = builder.throwY;
+			velocityX = builder.velocityX;
+			velocityY = builder.velocityY;
 		}
 }
