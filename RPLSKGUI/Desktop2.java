@@ -125,12 +125,12 @@ class DesktopPanel extends JPanel {
 	}
 
 	public void addThrows(ArrayList<Throwable> addList) {
-		for (int i = 0; i < addList.size(); i++) {
+		for (int index = 0; index < addList.size(); index++) {
 			ThrowColors randomColor = generateColor();
 			double randomVelocityX = generateVelocity();
 			double randomVelocityY = generateVelocity();
-			objList.add(new Throwable(new StringMovingObject.Builder().throwName(addList.get(i).getName())
-					.throwColor(randomColor).throwX(addList.get(i).getX()).throwY(addList.get(i).getY())
+			objList.add(new Throwable(new StringMovingObject.Builder().throwName(addList.get(index).getName())
+					.throwColor(randomColor).throwX(addList.get(index).getX()).throwY(addList.get(index).getY())
 					.velocityX(randomVelocityX).velocityY(randomVelocityY).build()));
 		}
 	}
