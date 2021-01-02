@@ -82,27 +82,27 @@ class DesktopPanel extends JPanel {
 		ArrayList<Throwable> removeList = new ArrayList<Throwable>();
 		ArrayList<Throwable> addList = new ArrayList<Throwable>();
 
-		for (int i = 0; i < objList.size(); i++) {
-			for (int j = i + 1; j < objList.size(); j++) {
-				if (objList.get(i).collision(objList.get(j))) {
+		for (int index1 = 0; index1 < objList.size(); index1++) {
+			for (int index2 = index1 + 1; index2 < objList.size(); index2++) {
+				if (objList.get(index1).collision(objList.get(index2))) {
 					outcome = "";
-					if (Handle.outcomes(objList.get(i), objList.get(j)) == Outcomes.WIN) {
-						removeList.add(objList.get(j));
-						throwPairs.add(objList.get(i).getName().toString());
+					if (Handle.outcomes(objList.get(index1), objList.get(index2)) == Outcomes.WIN) {
+						removeList.add(objList.get(index2));
+						throwPairs.add(objList.get(index1).getName().toString());
 						throwPairs.add(Outcomes.WIN.getOutcome());
-						throwPairs.add(objList.get(j).getName().toString());
-					} else if (Handle.outcomes(objList.get(i), objList.get(j)) == Outcomes.LOSS) {
-						removeList.add(objList.get(i));
-						throwPairs.add(objList.get(j).getName().toString());
+						throwPairs.add(objList.get(index2).getName().toString());
+					} else if (Handle.outcomes(objList.get(index1), objList.get(index2)) == Outcomes.LOSS) {
+						removeList.add(objList.get(index1));
+						throwPairs.add(objList.get(index2).getName().toString());
 						throwPairs.add(Outcomes.WIN.getOutcome());
-						throwPairs.add(objList.get(i).getName().toString());
+						throwPairs.add(objList.get(index1).getName().toString());
 					} else {
-						removeList.add(objList.get(i));
-						removeList.add(objList.get(j));
-						addList.add(objList.get(i));
-						throwPairs.add(objList.get(i).getName().toString());
+						removeList.add(objList.get(index1));
+						removeList.add(objList.get(index2));
+						addList.add(objList.get(index1));
+						throwPairs.add(objList.get(index1).getName().toString());
 						throwPairs.add(Outcomes.TIE.getOutcome());
-						throwPairs.add(objList.get(j).getName().toString());
+						throwPairs.add(objList.get(index2).getName().toString());
 					}
 				}
 			}
